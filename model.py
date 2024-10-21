@@ -1,4 +1,3 @@
-#Модуль для работы с базой данных
 import uuid
 
 from sqlalchemy import DateTime, ForeignKey, String
