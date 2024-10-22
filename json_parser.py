@@ -7,7 +7,6 @@ def parse_channel(data: dict) -> (str, str, str):
     snippet = item['snippet']
     title = snippet['title']
     description = snippet['description']
-        
     published_at = snippet['publishedAt']
     return title, description, published_at
 

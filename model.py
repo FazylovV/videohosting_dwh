@@ -6,8 +6,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import TIMESTAMP, TEXT, BIGINT, UUID, DATE, JSON
 
+
 class Base(AsyncAttrs, DeclarativeBase):
     pass
+
 
 class User(Base):
     __tablename__ = "users"
@@ -19,19 +21,25 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"User(id={self.id}, email={self.email}, username={self.username})"
-    
+
+
 class Channel(Base):
     __tablename__ = "channels"
-    id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[int] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     yt_id: Mapped[str] = mapped_column(String(24))
     title: Mapped[str] = mapped_column(String(50))
     description: Mapped[str] = mapped_column(TEXT, nullable=True)
     published_at: Mapped[str] = mapped_column(TIMESTAMP, server_default=func.now())
 
+
 class Video(Base):
     __tablename__ = "videos"
-    id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[int] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     channel_id: Mapped[int] = mapped_column(ForeignKey("channels.id"))
     yt_video_id: Mapped[int] = mapped_column(String(11))
     title: Mapped[str] = mapped_column(String(200), nullable=True)
