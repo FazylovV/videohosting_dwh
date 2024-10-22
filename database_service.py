@@ -6,6 +6,7 @@ from model import *
 
 load_dotenv()
 
+
 class DatabaseService:
 
     def __init__(self):
@@ -14,9 +15,10 @@ class DatabaseService:
         db_host = os.getenv("DB_HOST")
         db_port = os.getenv("DB_PORT")
         db_name = os.getenv("DB_NAME")
-        self.engine = create_engine(f"postgresql+psycopg2://"
-                                    f"{db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
-
+        self.engine = create_engine(
+            f"postgresql+psycopg2://"
+            f"{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        )
 
     def create_db(self):
         Base.metadata.create_all(self.engine)
@@ -28,7 +30,7 @@ class DatabaseService:
                 yt_id=yt_id,
                 title=title,
                 description=description,
-                published_at=published_at
+                published_at=published_at,
             )
 
             session.add(channel)
@@ -47,7 +49,7 @@ class DatabaseService:
                 yt_video_id=yt_video_id,
                 title=title,
                 published_at=published_at,
-                description=description
+                description=description,
             )
 
             session.add(video)
@@ -59,7 +61,7 @@ class DatabaseService:
                 email=email,
                 username=username,
                 birth_date=birth_date,
-                date_registration=date_registration
+                date_registration=date_registration,
             )
 
             session.add(user)
