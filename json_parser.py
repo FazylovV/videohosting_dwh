@@ -2,7 +2,7 @@ import json
 #from yotube_service import *
 from database_service import *
 
-def parse_channel(data: dict):
+def parse_channel(data: dict) -> (str, str, str):
     item = data['items'][0]
     snippet = item['snippet']
     title = snippet['title']

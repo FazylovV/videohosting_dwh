@@ -1,10 +1,7 @@
-import asyncio
+import re
+import requests
 from googleapiclient.discovery import build
 from pytube import YouTube
-import requests
-import aiohttp
-import re
-import json
 import generator
 from database_service import *
 from json_parser import *
