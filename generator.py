@@ -1,22 +1,13 @@
 from random import randint
 
-def generate_date(start_year, end_year) -> str:
+def generate_date(start_year: int, end_year: int) -> str:
     year = str(randint(start_year, end_year))
-    month = randint(1, 12)
-
-    if month < 10:
-        month = '0' + str(month)
-    else:
-        month = str(month)
-
-    day = randint(1, 28)
-
-    if day < 10:
-        day = '0' + str(day)
-    else:
-        day = str(day)
-
+    month = transform_view(randint(1, 12))
+    day = transform_view(randint(1, 28))
     return day + '.' + month + '.' + year
+
+def transform_view(num: int) -> str:
+    return str(num) if num >= 10 else '0' + str(num)
 
 def generate_username(custom_url: str) -> str:
     return custom_url.split('@')[1]
