@@ -1,26 +1,26 @@
 services:
   minio:
     container_name: minio
-    image: minio/minio
+    image: minio/minio:latest
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
     command: server /data --console-address ":9001"
     ports:
-      - 9000:9000
-      - 9001:9001
+      - "9000:${MINIO_API_PORT}"
+      - "9001:${MINIO_WEBUI_PORT}"
     volumes:
-      - C:\Users\vladi\Documents\Docker\dwh\data:/data
+      - .\dwh\data:/data
 
   postgres:
     container_name: postgres
-    image: postgres
+    image: postgres:latest
     environment:
-      POSTGRES_DB: dwh
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 5432
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
     ports:
-      - 5432:5432
+      - "5432:${DB_PORT}"
     volumes:
-      - C:\Users\vladi\Documents\Docker\dwh\postgres_data:/var/lib/postgresql/data
+      - .\postgres_data:/var/lib/postgresql/data
 
