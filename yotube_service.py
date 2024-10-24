@@ -132,5 +132,6 @@ class YoutubeService:
 
 yt_service = YoutubeService()
 yt_service.load_videos()
+generator.load_actions()
 
 # yt.load_videos_by_channel_id('UCq-Fj5jknLsUf-MWSy4_brA')

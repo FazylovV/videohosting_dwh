@@ -5,6 +5,7 @@ from database_service import db_service
 
 fake = Faker()
 videos_id = db_service.get_all_videos_id()
+users_to_generate = 99000
 
 
 def generate_date(start_year: int, end_year: int) -> str:
@@ -59,10 +60,10 @@ def load_views_and_likes(user_id: uuid):
 
 
 def load_actions():
-    for i in range(1000):
+    for i in range(users_to_generate):
         user_id = generate_and_load_user()
         load_views_and_likes(user_id)
 
 
 # generate_and_load_user()
-load_actions()
+# load_actions()
