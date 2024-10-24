@@ -67,11 +67,37 @@ class DatabaseService:
             session.add(user)
             session.commit()
 
+    def add_like(self, user_id, video_id, dt_like):
+        with Session(self.engine) as session:
+            like = Like(user_id=user_id, video_id=video_id, dt_like=dt_like)
+
+            session.add(like)
+            session.commit()
+
+    def add_view(self, user_id, video_id, dt_view):
+        with Session(self.engine) as session:
+            view = View(user_id=user_id, video_id=video_id, dt_view=dt_view)
+
+            session.add(view)
+            session.commit()
+
     def get_user_id_by_username(self, username: str):
         with Session(self.engine) as session:
             result = session.execute(select(User.id).where(User.username == username))
             user_id = result.scalars().first()
             return user_id
+
+    def get_user_id_by_email(self, email: str):
+        with Session(self.engine) as session:
+            result = session.execute(select(User.id).where(User.email == email))
+            user_id = result.scalars().first()
+            return user_id
+
+    def get_all_videos_id(self):
+        with Session(self.engine) as session:
+            result = session.execute(select(Video.id))
+            videos_id = result.scalars().all()
+            return videos_id
 
 
 db_service = DatabaseService()
