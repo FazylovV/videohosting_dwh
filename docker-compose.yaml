@@ -1,26 +1,59 @@
 services:
   minio:
-    container_name: minio
     image: minio/minio:latest
     environment:
-      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
-      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     command: server /data --console-address ":9001"
     ports:
       - "9000:${MINIO_API_PORT}"
       - "9001:${MINIO_WEBUI_PORT}"
     volumes:
-      - .\data:/data
+      - .\minio_data:/data
 
   postgres:
-    container_name: postgres
-    image: postgres:latest
+    image: postgres:13
     environment:
-      POSTGRES_DB: "${DB_NAME}"
-      POSTGRES_USER: "${DB_USER}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:${DB_PORT}"
     volumes:
       - .\postgres_data:/var/lib/postgresql/data
+
+  airflow-webserver:
+    image: apache/airflow:2.1.2
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${SECRET_KEY}
+      - AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080
+    ports:
+      - "8080:{AIRFLOW_PORT}"
+    volumes:
+      - .\dags:/opt/airflow/dags
+    depends_on:
+      - postgres
+      - airflow-scheduler
+
+  airflow-scheduler:
+    image: apache/airflow:2.1.2
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+    volumes:
+      - .\dags:/opt/airflow/dags
+    depends_on:
+      - postgres
+
+  airflow-init:
+    image: apache/airflow:2.1.2
+    entrypoint: /bin/bash -c "airflow db init"
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+    volumes:
+      - .\dags:/opt/airflow/dags
+    depends_on:
+      - postgres
 
