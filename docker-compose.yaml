@@ -27,6 +27,7 @@ services:
     container_name: airflow-webserver
     image: apache/airflow:2.1.2
     restart: always
+    entrypoint: airflow webserver
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
@@ -44,6 +45,7 @@ services:
     container_name: airflow-scheduler
     image: apache/airflow:2.1.2
     restart: always
+    entrypoint: airflow scheduler
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
