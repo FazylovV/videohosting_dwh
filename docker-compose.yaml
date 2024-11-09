@@ -1,10 +1,11 @@
 services:
   minio:
+    container_name: minio
     image: minio/minio:latest
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-    command: server /data --console-address ":9001"
+    command: server /data --console-address ":${MINIO_WEBUI_PORT}"
     ports:
       - "9000:${MINIO_API_PORT}"
       - "9001:${MINIO_WEBUI_PORT}"
@@ -12,25 +13,27 @@ services:
       - .\minio_data:/data
 
   postgres:
+    container_name: postgres
     image: postgres:13
+    restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:${DB_PORT}"
     volumes:
       - .\postgres_data:/var/lib/postgresql/data
 
   airflow-webserver:
+    container_name: airflow-webserver
     image: apache/airflow:2.1.2
+    restart: always
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
-      - AIRFLOW__WEBSERVER__SECRET_KEY=${SECRET_KEY}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY}
       - AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080
     ports:
-      - "8080:{AIRFLOW_PORT}"
+      - "8080:${AIRFLOW_PORT}"
     volumes:
       - .\dags:/opt/airflow/dags
     depends_on:
@@ -38,7 +41,9 @@ services:
       - airflow-scheduler
 
   airflow-scheduler:
+    container_name: airflow-scheduler
     image: apache/airflow:2.1.2
+    restart: always
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
@@ -48,6 +53,7 @@ services:
       - postgres
 
   airflow-init:
+    container_name: airflow-init
     image: apache/airflow:2.1.2
     entrypoint: /bin/bash -c "airflow db init"
     environment:
@@ -57,3 +63,6 @@ services:
     depends_on:
       - postgres
 
+volumes:
+  postgres_data:
+  minio_data:
