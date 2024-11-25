@@ -14,27 +14,50 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:13
-    restart: always
+    image: postgres:17
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_LOCAL_PORT}:${DB_CONTAINER_PORT}"
     volumes:
       - .\postgres_data:/var/lib/postgresql/data
 
+  spark:
+    image: docker.io/bitnami/spark:3.5
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "4040:4040"
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - minio
+
+  spark-worker:
+    image: docker.io/bitnami/spark:3.5
+    environment:
+      - SPARK_MODE=worker
+    env_file:
+      - .env
+    depends_on:
+      - spark
+
   airflow-webserver:
     container_name: airflow-webserver
-    image: apache/airflow:2.1.2
-    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
     entrypoint: airflow webserver
+    command:
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
       - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY}
       - AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080
     ports:
-      - "8080:${AIRFLOW_PORT}"
+      - "8084:${AIRFLOW_PORT}"
     volumes:
       - .\dags:/opt/airflow/dags
     depends_on:
@@ -44,7 +67,6 @@ services:
   airflow-scheduler:
     container_name: airflow-scheduler
     image: apache/airflow:2.1.2
-    restart: always
     entrypoint: airflow scheduler
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
@@ -57,7 +79,7 @@ services:
   airflow-init:
     container_name: airflow-init
     image: apache/airflow:2.1.2
-    entrypoint: /bin/bash -c "airflow db init"
+    entrypoint: /bin/bash -c "airflow db init && airflow users create ${AIRFLOW_USER}"
     environment:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
     volumes:
