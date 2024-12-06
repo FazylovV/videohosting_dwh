@@ -24,26 +24,6 @@ services:
     volumes:
       - .\postgres_data:/var/lib/postgresql/data
 
-  spark:
-    image: docker.io/bitnami/spark:3.5
-    environment:
-      - SPARK_MODE=master
-    ports:
-      - "4040:4040"
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - minio
-
-  spark-worker:
-    image: docker.io/bitnami/spark:3.5
-    environment:
-      - SPARK_MODE=worker
-    env_file:
-      - .env
-    depends_on:
-      - spark
-
   airflow-webserver:
     container_name: airflow-webserver
     build:
@@ -53,7 +33,7 @@ services:
     command:
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME_AIRFLOW}
       - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY}
       - AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080
     ports:
@@ -70,7 +50,7 @@ services:
     entrypoint: airflow scheduler
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME_AIRFLOW}
     volumes:
       - .\dags:/opt/airflow/dags
     depends_on:
@@ -81,7 +61,7 @@ services:
     image: apache/airflow:2.1.2
     entrypoint: /bin/bash -c "airflow db init && airflow users create ${AIRFLOW_USER}"
     environment:
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres/${DB_NAME_AIRFLOW}
     volumes:
       - .\dags:/opt/airflow/dags
     depends_on:
