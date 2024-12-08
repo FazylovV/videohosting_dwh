@@ -12,9 +12,9 @@ def create_tabel(name):
                 'cfv': dict(max_versions=10)
             }
         )
-    except Exception as error:
+    except TypeError as error:
         if 'AlreadyExists' not in str(error):
-            raise
+            raise error
 
 print(connection.tables())
 
@@ -28,7 +28,7 @@ for table_name in tables:
     table = connection.table(table_name)
     columns = df.columns
 
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         row_values = dict()
         for column in columns:
             row_values[f'cfv:{column}'.encode('utf-8')] = str(row[column]).encode('utf-8')
