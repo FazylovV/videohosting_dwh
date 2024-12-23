@@ -4,7 +4,7 @@ from airflow.operators.python import PythonOperator
 from airflow.decorators import task
 import pandas as pd
 from pandas import DataFrame
-from utils.etl_utils import (
+from etl_utils import (
     load_postgres_data,
     make_aggregate_videos,
     make_aggregate_channels,
